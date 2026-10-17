@@ -34,3 +34,13 @@ El cliente MariaDB de XAMPP importa el SQL solicitando la contraseña de forma i
 La contraseña se escribe cuando `mysql` muestre `Enter password:`; nunca se pone en el comando. Después verifica con `SELECT COUNT(*) FROM bd_techservices.clientes;` y `SELECT COUNT(*) FROM bd_techservices.usuarios_api;` (deben ser 5 y 2).
 
 En Render, configura `AIVEN_CA_CERT_BASE64` con el contenido Base64 del CA, `AIVEN_TRUSTSTORE_PASSWORD` como secreto, y la misma `DB_URL` con `sslMode=VERIFY_IDENTITY`. El entrypoint crea el truststore en `/tmp` al arrancar.
+
+## Importador JDBC temporal
+
+El importador aislado `tools/AivenSqlImporter.java` no forma parte del arranque de Spring Boot. Usa Connector/J, TLS `VERIFY_IDENTITY`, comprueba que las tablas remotas no tengan datos y solo entonces ejecuta `sql/01_init.sql`.
+
+```powershell
+$jar = (Get-ChildItem "$env:USERPROFILE\.m2\repository\com\mysql\mysql-connector-j" -Recurse -Filter '*.jar' | Select-Object -First 1 -ExpandProperty FullName)
+javac -cp $jar -d target\aiven-importer tools\AivenSqlImporter.java
+java -cp "target\aiven-importer;$jar" AivenSqlImporter
+```
