@@ -1,0 +1,8 @@
+.env
+target/
+.idea/
+*.iml
+certs/
+*.pem
+*.crt
+*.p12
